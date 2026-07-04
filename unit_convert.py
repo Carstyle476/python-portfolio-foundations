@@ -6,12 +6,14 @@ class Unit:
         # markers so we know which unit is which
         self.name   = name
         self.symbol = symbol
+
         # top and bottom of the scales (celsius 0-100, fahrenheit 32-212, etc...)
         # top goes first so we dont have to specify bottom scale being 0 every time
         self.top    = top
         self.bottom = bottom
-        # special handling for plural form
-        if len(plural) > 0 and not(plural.isalpha()): self.plural = name
+
+        # special handling for plural form (to be grammatically correct)
+        if len(plural) > 0 and not(check_allowed(plural.lower(), " abcdefghijklmnopqrstuvwxyz")): self.plural = name
         else: self.plural = name + "s" if plural == "" else plural
     
     # for sorting
@@ -25,6 +27,14 @@ class Unit:
         B: float = origin.top - origin.bottom
         D: float = output.top - output.bottom
         return output.top - (A * D / B)
+
+
+# check if every character in "string" exists in "allowed"
+def check_allowed(string: str, allowed: str) -> bool:
+    for char in string:
+        if allowed.find(char) == -1: return False
+    return True
+
 
 # build display of units (assuming they are sorted)
 def build_display(units: list[Unit]) -> str:
@@ -44,6 +54,7 @@ def build_display(units: list[Unit]) -> str:
         counter += 1
     return output
 
+
 # convert integer to corresponding key in dictionary
 def int2key(index: int, dictionary: dict) -> any:
     if index < 0 or index > len(dictionary): raise ValueError()
@@ -54,6 +65,8 @@ def int2key(index: int, dictionary: dict) -> any:
         counter += 1
     raise IndexError(f"Index out of bounds ({len(dictionary)}): {index}")
 
+
+# get an integer input from user
 def get_int(ask: str, valid_range: range = None) -> int:
     while True:
         text: str = input(f"{ask}\n>>> ")
@@ -62,64 +75,93 @@ def get_int(ask: str, valid_range: range = None) -> int:
             if valid_range == None or result in valid_range: return result
         print("\nInvalid input")
 
+
 def convert() -> bool:
     # DO NOT CHANGE!!!
-    THOUSAND: int   = 1000
-    MILE2MM:  int   = 1609344
-    KG2LB:    float = 2.2046226218
-    SQUARE60: int   = 60 ** 2
+    TWELVE:    int   = 12
+    THOUSAND:  int   = 1000
+    MILLION:   int   = THOUSAND ** 2
+    BILLION:   int   = MILLION * THOUSAND
+    SQUARE60:  int   = 3600
+    WEEK2HOUR: float = 24 * 7
+
+    MILE2MM:   int   = 1609344
+    MILE2KM:   int   = MILE2MM / MILLION
+    MILE2YARD: int   = 1760
+    MILE2INCH: int   = 63360
+
+    KG2LB:     float = 2.2046226218
+    LB2GRAIN:  float = KG2LB * THOUSAND * 7
+
 
     # massive table of units
     units: dict[str, list[Unit]] = {
         "distance": [
+            # not exactly metric
+            Unit("league",                "le",   1 / 3),
+            Unit("nautical mile",         "nmi",  MILE2KM / 1.852),
             Unit("mile",                  "mi",   1),
-            Unit("kilometer",             "km",   MILE2MM / THOUSAND ** 2),
-            Unit("meter",                 "m",    MILE2MM / 1000),
-            Unit("yard",                  "yd",   1760),
-            Unit("foot",                  "ft",   5280,             plural = "feet"),
-            Unit("inch",                  "in",   63360,            plural = "inches"),
+            Unit("cable",                 "cb",   MILE2YARD / TWELVE / 20),
+            Unit("fathom",                "ftm",  MILE2YARD / 2),
+            Unit("yard",                  "yd",   MILE2YARD),
+            Unit("foot",                  "ft",   MILE2YARD * 3,        plural = "feet"),
+            Unit("hand",                  "h",  MILE2INCH / 4),
+            Unit("inch",                  "in",   MILE2INCH,            plural = "inches"),
+            Unit("pica",                  "P",    MILE2INCH * 6),
+            Unit("point",                 "p",    MILE2INCH * TWELVE * 6),
+            Unit("thousandth of an inch", "thou", MILE2INCH * THOUSAND, plural = "thousandths of an inch"),
+            Unit("twip",                  "twip", MILE2INCH * TWELVE ** 2 * 10),
+            # metric
+            Unit("kilometer",             "km",   MILE2KM),
+            Unit("meter",                 "m",    MILE2MM / THOUSAND),
             Unit("centimeter",            "cm",   MILE2MM / 10),
             Unit("millimeter",            "mm",   MILE2MM),
-            Unit("thousandth of an inch", "thou", 63360 * THOUSAND, plural = "thousandths of an inch"),
             Unit("micrometer",            "um",   MILE2MM * THOUSAND),
-            Unit("nanometer",             "nm",   MILE2MM * THOUSAND ** 2),
-            Unit("angstrom",              "a",    MILE2MM * THOUSAND ** 2 * 10)
+            Unit("nanometer",             "nm",   MILE2MM * MILLION),
+            Unit("angstrom",              "A",    MILE2MM * MILLION * 10)
         ],
         "mass": [
-            Unit("long ton",         "lt", KG2LB / 2240),
-            Unit("metric ton",       "t",  1 / THOUSAND),
-            Unit("short ton",        "tn", KG2LB / THOUSAND / 2),
-            Unit("UK hundredweight", "UK cwt", KG2LB * 112, plural = "."),
-            Unit("US hundredweight", "US cwt", KG2LB * 100, plural = "."),
-            Unit("stone",            "st", KG2LB * 14),
-            Unit("kilogram",         "kg", 1),
-            Unit("pound",            "lb", KG2LB),
-            Unit("ounce",            "oz", 35.2739619496),
-            Unit("gram",             "g",  THOUSAND),
-            Unit("grain",            "gr", KG2LB * THOUSAND * 7),
-            Unit("milligram",        "mg", THOUSAND ** 2),
-            Unit("microgram",        "ug", THOUSAND ** 3),
-            Unit("nanogram",         "ng", THOUSAND ** 4)
+            # not exactly metric
+            Unit("long ton",            "lt",     KG2LB / 2240),
+            Unit("short ton",           "tn",     KG2LB / THOUSAND / 2),
+            Unit("long hundredweight",  "UK cwt", KG2LB / 112, plural = "."),
+            Unit("short hundredweight", "US cwt", KG2LB / 100, plural = "."),
+            Unit("stone",               "st",     KG2LB / 14,  plural = "."),
+            Unit("pound",               "lb",     KG2LB),
+            Unit("troy pound",          "lb t",   LB2GRAIN / TWELVE ** 2 / 40),
+            Unit("troy ounce",          "oz t",   LB2GRAIN / TWELVE / 40),
+            Unit("ounce",               "oz",     KG2LB * 16),
+            Unit("dram",                "dr",     KG2LB * 256),
+            Unit("carat",               "ct",     MILLION / 200),
+            Unit("pennyweight",         "dwt",    LB2GRAIN / TWELVE / 2),
+            Unit("grain",               "gr",     LB2GRAIN),
+            # metric
+            Unit("metric ton",          "t",      1 / THOUSAND),
+            Unit("kilogram",            "kg",     1),
+            Unit("gram",                "g",      THOUSAND),
+            Unit("milligram",           "mg",     MILLION),
+            Unit("microgram",           "ug",     BILLION),
+            Unit("nanogram",            "ng",     MILLION ** 2)
         ],
         "temperature": [
-            Unit("newton",     "*N",  33,       plural = "."),
-            Unit("romer",      "*Ro", 60,       7.5,     "."),
-            Unit("reaumur",    "*Re", 80,       plural = "."),
-            Unit("celsius",    "*C",  100,      plural = "."),
-            Unit("delisle",    "*De", 0,        150,     "."),
-            Unit("fahrenheit", "*F",  212,      32,      "."),
-            Unit("kelvin",     "K",   373.1339, 273.15,  "."),
-            Unit("rankine",    "*Ra", 671.641,  491.67,  ".")
+            Unit("newton",     "*N",  33,     plural = "."),
+            Unit("romer",      "*Ro", 60,     7.5,     "."),
+            Unit("reaumur",    "*Re", 80,     plural = "."),
+            Unit("celsius",    "*C",  100,    plural = "."),
+            Unit("delisle",    "*De", 0,      150,     "."),
+            Unit("fahrenheit", "*F",  212,    32,      "."),
+            Unit("kelvin",     "K",   373.15, 273.15,  "."),
+            Unit("rankine",    "*Ra", 671.67, 491.67,  ".")
         ],
         "time": [
-            Unit("week",        "N/A", 1 / 24 / 7),
-            Unit("day",         "d",   1 / 24),
-            Unit("hour",        "h",   1),
-            Unit("minute",      "m",   60),
-            Unit("second",      "s",   SQUARE60),
-            Unit("milisecond",  "ms",  SQUARE60 * THOUSAND),
-            Unit("microsecond", "us",  SQUARE60 * THOUSAND ** 2),
-            Unit("nanosecond",  "ns",  SQUARE60 * THOUSAND ** 3)
+            Unit("week",        "N/A", 1),
+            Unit("day",         "d",   7),
+            Unit("hour",        "h",   WEEK2HOUR),
+            Unit("minute",      "m",   WEEK2HOUR * 60),
+            Unit("second",      "s",   WEEK2HOUR * SQUARE60),
+            Unit("milisecond",  "ms",  WEEK2HOUR * SQUARE60 * THOUSAND),
+            Unit("microsecond", "us",  WEEK2HOUR * SQUARE60 * MILLION),
+            Unit("nanosecond",  "ns",  WEEK2HOUR * SQUARE60 * BILLION)
         ]
     }
     # sort them in ascending order
@@ -144,23 +186,12 @@ def convert() -> bool:
     # ask for value
     print()
     value: float = 0
-    ALLOWED: str = ".0123456789"
     while True:
         text: str = input(f"Enter value in {selected_origin.plural}\n>>> ")
-        valid: bool = True
-
-        if len(text) == 0: valid = False
-        for char in text:
-            if ALLOWED.find(char) == -1:
-                valid = False
-                break
-        
-        if not(valid):
-            print("\nInvalid input")
-            continue
-
-        value = float(text)
-        break
+        if len(text) > 0 and check_allowed(text, ".0123456789"):
+            value = float(text)
+            break
+        print("\nInvalid input")
 
     # ask for output unit
     print()
@@ -168,12 +199,14 @@ def convert() -> bool:
     selected_output_int: int = get_int(f"Select the output unit\n{build_display(selected_type)}", range(len(selected_type)))
     selected_output: Unit = selected_type[selected_output_int]
 
-    # display result with specified accuracy
+    # display result with specified accuracy (if needed)
     print()
-    accuracy: int = get_int("How much accuracy? (in digits after the decimal)")
+    conversion_result:  float = Unit.convert(value, selected_origin, selected_output)
+    rounded_conversion: int   = round(conversion_result)
+    accuracy: int = 0 if rounded_conversion == conversion_result else get_int("How much accuracy? (in digits after the decimal)")
 
-    conversion_result: float = round(Unit.convert(value, selected_origin, selected_output), accuracy)
-    print(f"{value} {selected_origin.name if value == 1 else selected_origin.plural} is (approx.) {conversion_result} {selected_output.name if conversion_result == 1 else selected_output.plural}")
+    rounded_value: int = round(value)
+    print(f"{rounded_value if rounded_value == value else value} {selected_origin.name if value == 1 else selected_origin.plural} is {rounded_conversion if accuracy == 0 else f'approximately {round(conversion_result, accuracy)}'} {selected_output.name if conversion_result == 1 else selected_output.plural}")
 
     # ask to convert again
     print()
