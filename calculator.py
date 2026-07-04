@@ -1,79 +1,20 @@
 
-from math import factorial
+from math import *
 import sys
 
 def calculate(current: float, string: str) -> float:
-    ALLOWED:        str   = ".0123456789+-*/^!"
-    operation_char: str   = ""
-    num_build_temp: str   = ""
-    prev_char:      str   = ""
-    operation_num1: float = current
-    operation_num2: float = current
-    num1_built:     bool  = False
-    num2_built:     bool  = False
-    # 0 - operation
-    # 1 - number
-    prev_type:      int   = -1
+    ALLOWED: str = ".0123456789+-*/()"
 
-    # go through every character
+    modify_current: bool = False
     for char in string:
-        # ignore spaces
-        if char == " ":
-            continue
-
-        # complain if there's something it doesn't know
+        if char == " ": continue
         if ALLOWED.find(char) == -1: raise SyntaxError(f"Unsupported character found: {char}")
-
-        # operation
-        if char in ALLOWED[11:]:
-            if operation_char != "": raise SyntaxError("More than one operation found")
-            operation_char += char
-
-            if num_build_temp != "":
-                if not(num1_built):
-                    operation_num1 = float(num_build_temp)
-                    num1_built = True
-                elif not(num2_built):
-                    operation_num2 = float(num_build_temp)
-                    num2_built = True
-            
-            num_build_temp = ""
-            prev_type = 0
-        # number
-        else:
-            if prev_type == 1 and prev_char == " ": raise SyntaxError("Gap in number found")
-            num_build_temp += char
-            prev_type = 1
+        if ALLOWED[11:].find(char) != -1:
+            modify_current = True
+            break
+        if ALLOWED[:11].find(char) != -1: break
     
-    # TODO: dont repeat this block of code
-    if num_build_temp != "":
-        if not(num1_built):
-            operation_num1 = float(num_build_temp)
-            num1_built = True
-        elif not(num2_built):
-            operation_num2 = float(num_build_temp)
-            num2_built = True
-    
-    # complain again
-    if not(num1_built): raise ValueError("No operands found")
-    if operation_char == "": return operation_num1
-    
-    # the actual calculation
-    numbers: list[int] = [
-        current if not(num2_built) else operation_num1,
-        operation_num1 if not(num2_built) else operation_num2
-    ]
-    if operation_char == "+": numbers[0] += numbers[1]
-    if operation_char == "-": numbers[0] -= numbers[1]
-    if operation_char == "*": numbers[0] *= numbers[1]
-    if operation_char == "/": numbers[0] /= numbers[1]
-    if operation_char == "^": numbers[0] **= numbers[1]
-    if operation_char == "!":
-        if num2_built: raise SyntaxError("More than 1 operand inputted for factorial")
-        if round(numbers[0]) != numbers[0]: raise TypeError("Non-integer operand inputted for factorial")
-        numbers[0] = factorial(numbers[0])
-
-    return numbers[0]
+    return eval(f"{current if modify_current else ''}{string}")
 
 def main() -> None:
     current: float = 0
