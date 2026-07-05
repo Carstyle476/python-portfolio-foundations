@@ -1,6 +1,10 @@
 
 from re import match
 from time import time, sleep
+from random import shuffle
+
+# regex to match yes answers
+YES: str = "y[eahps]*"
 
 # MASSIVE table of questions and their answers
 # the answers are stored in either direct or regular expression form
@@ -31,8 +35,8 @@ def questions_answers() -> dict[str, tuple[bool, list[str]]]:
         (False, ["rockport"]),
 
         # y (for yes)
-        "Is SQL mainly used for databases? (y/n)":
-        (False, ["y"]),
+        "Is SQL mainly used for databases? (yes/no)":
+        (True, [YES, "yes"]),
 
         "Which country's flag looks like a flipped Indonesian flag?":
         (False, ["poland", "polska", "republic of poland", "rzeczpospolita polska"]),
@@ -46,7 +50,14 @@ def questions_answers() -> dict[str, tuple[bool, list[str]]]:
 
 # main quiz function
 def quiz(show: bool) -> None:
-    questions: dict[str, tuple[bool, list[str]]] = questions_answers()
+    # get question/answer list and shuffle them
+    # (these are some pretty long types...)
+    questions:  dict[str, tuple[bool, list[str]]]        = questions_answers()
+    q_list:     list[tuple[str, tuple[bool, list[str]]]] = list(questions.items())
+    shuffle(q_list)
+    questions = dict(q_list)
+
+    # keep track of score
     score:     int = 0
 
     # flags
@@ -110,9 +121,9 @@ def quiz(show: bool) -> None:
 
 # settings and quiz start is handled here
 def main() -> None:
-    show_option_input: str = input("\nPop quiz!\nDo you want correct answers to be displayed if answered incorrectly? (y/n)\n>>> ")
+    show_option_input: str = input("\nPop quiz!\nDo you want correct answers to be displayed if answered incorrectly? (yes/no)\n>>> ")
     print("Remember:\n- Leave blank to exit prematurely\n- DO NOT MAKE TYPOS! This program doesn't check for them")
     # handling the "show incorrect answers" option
-    quiz(show_option_input == "y")
+    quiz(match(YES, show_option_input))
 
 if __name__ == "__main__": main()
