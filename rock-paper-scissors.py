@@ -64,7 +64,7 @@ def main() -> None:
         # formatting
         print()
 
-        text: str            = input(f"{display}\nYour score: {player}\CPU's score: {cpu}\nSelect an option (blank to exit)\n>>> ")
+        text: str            = input(f"{display}\nYour score: {player}\nCPU's score: {cpu}\nSelect an option (blank to exit)\n>>> ")
         player_selected: int = -1
         valid: bool          = False
 

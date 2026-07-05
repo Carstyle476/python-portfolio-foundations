@@ -37,7 +37,7 @@ def main() -> None:
             if temp_input != "": temp_text = temp_input
             current = calculate(current, temp_text)
             text = temp_text
-        except: print(f"An error occured:\n{repr(sys.exception())}")
+        except Exception: print(f"An error occured:\n{repr(sys.exception())}")
         tips = False
 
 if __name__ == "__main__": main()
