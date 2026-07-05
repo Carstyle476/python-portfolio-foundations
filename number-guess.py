@@ -1,5 +1,4 @@
 
-# import stuff we need
 from random import randint
 from time import sleep
 
@@ -16,24 +15,27 @@ def main() -> None:
 
     # guessing loop
     while guess != target:
-        # handle non-integer inputs
+        # handle invalid inputs
         try:
             text_input = input(">>> ").strip()
             if not(text_input.isdigit()): raise TypeError()
             guess = int(text_input)
             if guess < LOWER or guess > UPPER: raise ValueError()
+        # not a number
         except TypeError:
             print("Not a valid number, try again")
             continue
         except ValueError:
+        # number out of range
             print(f"Number {f'below {LOWER}' if guess < LOWER else f'above {UPPER}'}, try again")
             continue
         
+        # print the result
         attempts += 1
         if guess < target: print("Too low, try again")
         elif guess > target: print("Too high, try again")
         else: print(f"You got it! The number was {target}\nYou took {attempts} attempts")
+    # (for 4 seconds, so user can actually read it)
     sleep(4)
 
-# this file is meant to be executed
 if __name__ == "__main__": main()

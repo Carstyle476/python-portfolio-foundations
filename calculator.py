@@ -2,9 +2,11 @@
 from math import *
 import sys
 
+# interpret an input string (with the help of eval())
 def calculate(current: float, string: str) -> float:
     ALLOWED: str = ".0123456789+-*/()"
 
+    # check whether to modify current number or overwrite it with result of input expression
     modify_current: bool = False
     for char in string:
         if char == " ": continue
@@ -14,6 +16,7 @@ def calculate(current: float, string: str) -> float:
             break
         if ALLOWED[:11].find(char) != -1: break
     
+    # spit out the result
     return eval(f"{current if modify_current else ''}{string}")
 
 def main() -> None:
