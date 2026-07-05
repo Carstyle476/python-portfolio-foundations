@@ -48,6 +48,14 @@ def questions_answers() -> dict[str, tuple[bool, list[str]]]:
         (False, ["deutschland"])
     }
 
+# check if answer is correct
+def check_answer(given: str, correct: tuple[bool, list[str]]) -> bool:
+    if correct[0]: return match(correct[1][0], given) != None
+    else:
+        for answer in correct[1]:
+            if answer == given: return True
+    return False
+
 # main quiz function
 def quiz(show: bool) -> None:
     # get question/answer list and shuffle them
@@ -60,35 +68,24 @@ def quiz(show: bool) -> None:
     # keep track of score
     score:     int = 0
 
-    # flags
+    # exit flag
     exit:    bool = False
-    started: bool = False
-    # start gets time() now as fallback in case i missed something
     start: float = time()
     # loop over every question
     for i in questions:
-        correct: bool = False
-
-        # get answer from user
-        # for internal comparison, make it lowercase and remove any spaces at start and end
         try:
+            # get answer from user
+            # for internal comparison, make it lowercase and remove any spaces at start and end
             given_answer:   str = input(f"\n{i}\n>>> ").lower().strip()
             correct_answer: tuple[bool, list[str]] = questions[i]
 
+            # blank exit
             if given_answer == "":
                 exit = True
                 break
 
-            # handle direct vs regex questions
-            if correct_answer[0]: correct = match(correct_answer[1][0], given_answer) != None
-            else:
-                for answer in correct_answer[1]:
-                    if answer == given_answer:
-                        correct = True
-                        break
-
             # display result
-            if correct:
+            if check_answer(given_answer, correct_answer):
                 score += 1
                 print(f"Correct! Your score: {score}")
             else:
@@ -101,11 +98,6 @@ def quiz(show: bool) -> None:
         except KeyboardInterrupt:
             exit = True
             break
-
-        # start the timer only when the 1st question is answered
-        if not(started):
-            started = True
-            start = time()
     # record how long it took
     stop: float = time()
 
@@ -123,7 +115,10 @@ def quiz(show: bool) -> None:
 def main() -> None:
     show_option_input: str = input("\nPop quiz!\nDo you want correct answers to be displayed if answered incorrectly? (yes/no)\n>>> ")
     print("Remember:\n- Leave blank to exit prematurely\n- DO NOT MAKE TYPOS! This program doesn't check for them")
+
+    input("Hit enter when you're ready\n")
+
     # handling the "show incorrect answers" option
-    quiz(match(YES, show_option_input))
+    quiz(match(YES, show_option_input) != None)
 
 if __name__ == "__main__": main()
