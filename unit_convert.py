@@ -220,6 +220,10 @@ def convert() -> bool:
 
 def main() -> None:
     restart: bool = True
-    while restart: restart = convert()
+    while restart:
+        # wrap the entire program in a try/except block just for ctrl+c exit (yikes)
+        try: restart = convert()
+        except KeyboardInterrupt: break
+    print("\nExiting...")
 
 if __name__ == "__main__": main()

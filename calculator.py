@@ -1,6 +1,5 @@
 
 from math import *
-import sys
 
 # interpret an input string (with the help of eval())
 def calculate(current: float, string: str) -> float:
@@ -26,10 +25,13 @@ def main() -> None:
 
     # replicate actual calculator behavior
     while True:
+        exit: bool = False
+
         try:
             temp_text = text
-            temp_input = input(f"{'\nt to display this\ne to exit\nenter to repeat operation\n' if tips else ''}\n{current}\n>>> ")
-            if temp_input == "e": return
+            temp_input = input(f"{'\nt to display these tips\ne to exit\nenter to repeat operation\n' if tips else ''}\n{current}\n>>> ")
+            # "regular" exit
+            if temp_input == "e": exit = True
             if temp_input == "t":
                 tips = True
                 continue
@@ -37,7 +39,17 @@ def main() -> None:
             if temp_input != "": temp_text = temp_input
             current = calculate(current, temp_text)
             text = temp_text
-        except Exception: print(f"An error occured:\n{repr(sys.exception())}")
+        # ctrl+c exit
+        except KeyboardInterrupt: exit = True
+        # eval() threw an error
+        except Exception as e: print(f"An error occured:\n{repr(e)}")
+
+        # exit mechanism
+        if exit:
+            print("\nExiting...")
+            return
+        
+        # disable tips
         tips = False
 
 if __name__ == "__main__": main()

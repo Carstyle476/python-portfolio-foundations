@@ -61,10 +61,13 @@ def main() -> None:
 
     # game loop
     while True:
-        # formatting
-        print()
+        exit: bool = False
 
-        text: str            = input(f"{display}\nYour score: {player}\nCPU's score: {cpu}\nSelect an option (blank to exit)\n>>> ")
+        # get input
+        text: str = ""
+        try: text  = input(f"{display}\nYour score: {player}\nCPU's score: {cpu}\nSelect an option (blank to exit)\n>>> ").strip()
+        # ctrl+c exit
+        except KeyboardInterrupt: exit = True
         player_selected: int = -1
         valid: bool          = False
 
@@ -72,7 +75,12 @@ def main() -> None:
         if text.isnumeric():
             player_selected = int(text)
             if player_selected < option_count: valid = True
-        elif text == "": return
+        elif text == "": exit = True
+
+        # exit mechanism
+        if exit:
+            print("\nExiting...")
+            return
         
         if valid:
             # determine who won

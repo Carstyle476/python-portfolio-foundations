@@ -9,6 +9,4 @@ List of current programs (in order of creation):
 - calculator.py - A simple calculator program
 - rock-paper-scissors.py - A program for playing rock paper scissors (with 2 more options!)
 - mad_libs.py - Mad Libs, but on the command line
-
-List of upcoming programs:
 - quiz.py - Pop quiz! See how many questions you can answer correctly

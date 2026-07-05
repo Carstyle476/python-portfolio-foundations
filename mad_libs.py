@@ -67,7 +67,15 @@ def main() -> None:
     # keep going until user wants to exit
     while True:
         can_retry: bool = pick >= 0
-        text: str = input(f"\np - play new{'\nr - retry same' if can_retry else ''}\ne - exit\nSelect an option\n>>> ")
+        exit: bool = False
+
+        # get input
+        # (set this to "e" to exit in case i missed something)
+        text: str = "e"
+        try: text = input(f"\np - play new{'\nr - retry same' if can_retry else ''}\ne - exit\nSelect an option\n>>> ").lower().strip()
+        # ctrl+c exit
+        except KeyboardInterrupt: exit = True
+        
         # play a new game
         if text == "p":
             if pick == -1: pick = randint(0, len(templates) - 1)
@@ -76,8 +84,12 @@ def main() -> None:
             mad_libs(templates[pick])
         # retry the same game
         elif can_retry and text == "r": mad_libs(templates[pick])
-        # exit
-        elif text == "e": return
+        # "regular" exit
+        elif text == "e": exit = True
         else: print("\nInvalid input")
+
+        if exit:
+            print("\nExiting...")
+            return
 
 if __name__ == "__main__": main()

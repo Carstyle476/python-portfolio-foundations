@@ -11,16 +11,23 @@ def main() -> None:
     target: int = randint(LOWER, UPPER)
     guess: int = -1
 
-    print("Guess a number between 1 and 100 (inclusive)")
+    print("\nGuess a number between 1 and 100 (inclusive)\n(leave blank to exit)")
 
     # guessing loop
     while guess != target:
+        exit: bool = False
+
         # handle invalid inputs
         try:
             text_input = input(">>> ").strip()
-            if not(text_input.isdigit()): raise TypeError()
-            guess = int(text_input)
-            if guess < LOWER or guess > UPPER: raise ValueError()
+            if not(text_input.isdigit()):
+                if text_input == "": exit = True
+                else: raise TypeError()
+            else:
+                guess = int(text_input)
+                if guess < LOWER or guess > UPPER: raise ValueError()
+        # ctrl+c exit
+        except KeyboardInterrupt: exit = True
         # not a number
         except TypeError:
             print("Not a valid number, try again")
@@ -29,6 +36,11 @@ def main() -> None:
         # number out of range
             print(f"Number {f'below {LOWER}' if guess < LOWER else f'above {UPPER}'}, try again")
             continue
+
+        # actual exit mechanism
+        if exit:
+            print("\nExiting...")
+            return
         
         # print the result
         attempts += 1
